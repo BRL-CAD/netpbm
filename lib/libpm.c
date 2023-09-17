@@ -31,7 +31,6 @@
 #include "netpbm/mallocvar.h"
 #include "netpbm/version.h"
 #include "netpbm/nstring.h"
-#include "netpbm/shhopt.h"
 #include "compile.h"
 
 #include "pm.h"
@@ -801,7 +800,7 @@ pm_parse_width(const char * const arg) {
     unsigned int width;
     const char * error;
 
-    pm_interpret_uint(arg, &width, &error);
+    pm_string_to_uint(arg, &width, &error);
 
     if (error) {
         pm_error("'%s' is invalid as an image width.  %s", arg, error);
@@ -826,7 +825,7 @@ pm_parse_height(const char * const arg) {
     unsigned int height;
     const char * error;
 
-    pm_interpret_uint(arg, &height, &error);
+    pm_string_to_uint(arg, &height, &error);
 
     if (error) {
         pm_error("'%s' is invalid as an image height.  %s", arg, error);

@@ -81,61 +81,6 @@ openColornameFileSearch(const char * const searchPath,
 }
 
 
-
-FILE *
-pm_openColornameFile(const char * const fileName, const int must_open) {
-/*----------------------------------------------------------------------------
-   Open the colorname dictionary file.  Its file name is 'fileName', unless
-   'fileName' is NULL.  In that case, its file name is the value of the
-   environment variable whose name is RGB_ENV (e.g. "RGBDEF").  Except
-   if that environment variable is not set, it is the first file found,
-   if any, in the search path RGB_DB_PATH.
-   
-   'must_open' is a logical: we must get the file open or die.  If
-   'must_open' is true and we can't open the file (e.g. it doesn't
-   exist), exit the program with an error message.  If 'must_open' is
-   false and we can't open the file, just return a null pointer.
------------------------------------------------------------------------------*/
-    FILE *f;
-
-    if (fileName == NULL) {
-        const char * rgbdef = getenv(RGBENV);
-        if (rgbdef) {
-            /* The environment variable is set */
-            f = fopen(rgbdef, "r");
-            if (f == NULL && must_open)
-                pm_error("Can't open the color names dictionary file "
-                         "named %s, per the %s environment variable.  "
-                         "errno = %d (%s)",
-                         rgbdef, RGBENV, errno, strerror(errno));
-        } else {            
-            /* The environment variable isn't set, so try the hardcoded
-               default color name dictionary locations.
-            */
-            openColornameFileSearch(RGB_DB_PATH, &f);
-
-            if (f == NULL && must_open) {
-                pm_error("can't open color names dictionary file from the "
-                         "path '%s' "
-                         "and Environment variable %s not set.  Set %s to "
-                         "the pathname of your rgb.txt file or don't use "
-                         "color names.", 
-                         RGB_DB_PATH, RGBENV, RGBENV);
-            }
-        }
-    } else {
-        f = fopen(fileName, "r");
-        if (f == NULL && must_open)
-            pm_error("Can't open the color names dictionary file '%s'.  "
-                     "errno = %d (%s)", fileName, errno, strerror(errno));
-        
-    }
-    lineNo = 0;
-    return(f);
-}
-
-
-
 struct colorfile_entry
 pm_colorget(FILE * const f) {
 /*----------------------------------------------------------------------------

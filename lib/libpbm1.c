@@ -20,7 +20,6 @@
 
 #include "netpbm/pm_c_util.h"
 #include "netpbm/mallocvar.h"
-#include "netpbm/shhopt.h"
 
 #include "pbm.h"
 
