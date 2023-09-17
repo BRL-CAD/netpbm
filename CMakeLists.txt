@@ -65,7 +65,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/util/netpbm
   )
 
-set(NETPBM_VERSION 10.73.42)
+set(NETPBM_VERSION 10.73.43)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/netpbm)
 configure_file(version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version_new.h)
