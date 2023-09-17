@@ -1,3 +1,21 @@
+NOTE:  For these purposes we build just the libnetpbm library using a CMake
+build.  The BRL-CAD src/other/ext archive (to save space) removes most of the
+files not used for that purpose, as well as adding a few files to help the
+CMake build succeed.
+
+Rather than using static symlinks for include header locating, we move the .h
+files to netpbm subdirectories.  This simplifies matters on platforms such as
+Windows that don't properly support symlink capabilities.
+
+The other significant change made here is to modify the superstable netpbm to
+incorporate the changes from https://sourceforge.net/p/netpbm/code/4419/ which
+remove a GPL string module.  (Previously we had more extensive mods with our
+own solution - to stay closer to upstream, we now simply replace the stable
+nstring with the version from advanced and update libpm.c accordingly.)
+
+We have also stripped out the shhopt code, since we are not using it.
+
+Currently bundled BRL-CAD version of NETPBM is 10.73.42
 
                                  NETPBM
 
