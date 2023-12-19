@@ -12,23 +12,18 @@
 #include <io.h> // for close
 #endif
 
-#define _SVID_SOURCE
-    /* Make sure P_tmpdir is defined in GNU libc 2.0.7 (_XOPEN_SOURCE 500
-       does it in other libc's).  pm_config.h defines TMPDIR as P_tmpdir
-       in some environments.
-    */
-#ifndef __APPLE__
-#define _BSD_SOURCE    /* Make sure strdup is defined */
-#define _DARWIN_C_SOURCE   /* Make sure strdup() is in string.h */
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE /* New name for SVID & BSD source defines */
 #endif
+#define _DARWIN_C_SOURCE   /* Make sure strdup() is in string.h */
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 500    /* Make sure ftello, fseeko, strdup are defined */
 #endif
 #define _LARGEFILE_SOURCE 1  /* Make sure ftello, fseeko are defined */
-#define _LARGEFILE64_SOURCE 1 
+#define _LARGEFILE64_SOURCE 1
 #define _FILE_OFFSET_BITS 64
     /* This means ftello() is really ftello64() and returns a 64 bit file
-       position.  Unless the C library doesn't have ftello64(), in which 
+       position.  Unless the C library doesn't have ftello64(), in which
        case ftello() is still just ftello().
 
        Likewise for all the other C library file functions.
@@ -36,7 +31,7 @@
        And off_t and fpos_t are 64 bit types instead of 32.  Consequently,
        pm_filepos_t might be 64 bits instead of 32.
     */
-#define _LARGE_FILES  
+#define _LARGE_FILES
     /* This does for AIX what _FILE_OFFSET_BITS=64 does for GNU */
 #define _LARGE_FILE_API
     /* This makes the the x64() functions available on AIX */
@@ -73,9 +68,9 @@ pm_openr(const char * const name) {
         f = stdin;
     else {
         f = fopen(name, "rb");
-        if (f == NULL) 
+        if (f == NULL)
             pm_error("Unable to open file '%s' for reading.  "
-                     "fopen() returns errno %d (%s)", 
+                     "fopen() returns errno %d (%s)",
                      name, errno, strerror(errno));
     }
     return f;
@@ -91,9 +86,9 @@ pm_openw(const char * const name) {
         f = stdout;
     else {
         f = fopen(name, "wb");
-        if (f == NULL) 
+        if (f == NULL)
             pm_error("Unable to open file '%s' for writing.  "
-                     "fopen() returns errno %d (%s)", 
+                     "fopen() returns errno %d (%s)",
                      name, errno, strerror(errno));
     }
     return f;
@@ -137,7 +132,7 @@ tmpDir(char *tmpdir_aux_win32) {
 static int
 tempFileOpenFlags(void) {
 /*----------------------------------------------------------------------------
-  Open flags (argument to open()) suitable for a new temporary file  
+  Open flags (argument to open()) suitable for a new temporary file
 -----------------------------------------------------------------------------*/
     int retval;
 
@@ -241,11 +236,11 @@ mkstempx(char * const filenameBuffer) {
             } else {
                 if (errno == EEXIST) {
                     /* We'll just have to keep trying */
-                } else 
+                } else
                     error = TRUE;
             }
         }
-    }    
+    }
     if (gotFile)
         retval = fd;
     else
@@ -275,7 +270,7 @@ makeTmpfileWithTemplate(const char *  const filenameTemplate,
                         int *         const fdP,
                         const char ** const filenameP,
                         const char ** const errorP) {
-    
+
     char * filenameBuffer;  /* malloc'ed */
 
     filenameBuffer = strdup(filenameTemplate);
@@ -285,9 +280,9 @@ makeTmpfileWithTemplate(const char *  const filenameTemplate,
                     "file name");
     else {
         int rc;
-        
+
         rc = mkstemp2(filenameBuffer);
-        
+
         if (rc < 0)
             pm_asprintf(errorP,
                         "Unable to create temporary file according to name "
@@ -323,8 +318,8 @@ pm_make_tmpfile_fd(int *         const fdP,
         dirseparator = "";
     else
         dirseparator = "/";
-    
-    pm_asprintf(&filenameTemplate, "%s%s%s%s", 
+
+    pm_asprintf(&filenameTemplate, "%s%s%s%s",
                 tmpdir, dirseparator, pm_progname, "_XXXXXX");
 
     if (filenameTemplate == pm_strsol)
@@ -353,7 +348,7 @@ pm_make_tmpfile(FILE **       const filePP,
     pm_make_tmpfile_fd(&fd, filenameP);
 
     *filePP = fdopen(fd, "w+b");
-    
+
     if (*filePP == NULL) {
         close(fd);
         unlink(*filenameP);
@@ -367,7 +362,7 @@ pm_make_tmpfile(FILE **       const filePP,
 
 
 
-bool const canUnlinkOpen = 
+bool const canUnlinkOpen =
 #if CAN_UNLINK_OPEN
     1
 #else
@@ -456,7 +451,7 @@ scheduleUnlinkAtExit(const char * const fileName,
    code too badly for Unix.
 -----------------------------------------------------------------------------*/
     static bool unlinkListEstablished = false;
-    
+
     if (!unlinkListEstablished) {
         atexit(unlinkTempFiles);
         unlinkListP = NULL;
@@ -480,7 +475,7 @@ arrangeUnlink(const char * const fileName,
 
 
 
-FILE * 
+FILE *
 pm_tmpfile(void) {
 
     FILE * fileP;
@@ -535,7 +530,7 @@ pm_openr_seekable(const char name[]) {
 
     original_file = pm_openr((char *) name);
 
-    /* I would use fseek() to determine if the file is seekable and 
+    /* I would use fseek() to determine if the file is seekable and
        be a little more general than checking the type of file, but I
        don't have reliable information on how to do that.  I have seen
        streams be partially seekable -- you can, for example seek to
@@ -550,16 +545,16 @@ pm_openr_seekable(const char name[]) {
     stat_rc = fstat(fileno(original_file), &statbuf);
     if (stat_rc == 0 && S_ISREG(statbuf.st_mode))
         seekable = TRUE;
-    else 
+    else
         seekable = FALSE;
 
     if (seekable) {
         seekable_file = original_file;
     } else {
         seekable_file = pm_tmpfile();
-        
+
         /* Copy the input into the temporary seekable file */
-        while (!feof(original_file) && !ferror(original_file) 
+        while (!feof(original_file) && !ferror(original_file)
                && !ferror(seekable_file)) {
             char buffer[4096];
             int bytes_read;
@@ -599,7 +594,7 @@ pm_close(FILE * const f) {
 
 
 
-/* The pnmtopng package uses pm_closer() and pm_closew() instead of 
+/* The pnmtopng package uses pm_closer() and pm_closew() instead of
    pm_close(), apparently because the 1999 Pbmplus package has them.
    I don't know what the difference is supposed to be.
 */
@@ -663,7 +658,7 @@ getcNofail(FILE * const ifP) {
 void
 pm_readchar(FILE * const ifP,
             char * const cP) {
-    
+
     *cP = (char)getcNofail(ifP);
 }
 
@@ -679,7 +674,7 @@ pm_writechar(FILE * const ofP,
 
 
 int
-pm_readbigshort(FILE *  const ifP, 
+pm_readbigshort(FILE *  const ifP,
                 short * const sP) {
 
     unsigned short s;
@@ -695,7 +690,7 @@ pm_readbigshort(FILE *  const ifP,
 
 
 int
-pm_writebigshort(FILE * const ofP, 
+pm_writebigshort(FILE * const ofP,
                  short  const s) {
 
     putc((s >> 8) & 0xff, ofP);
@@ -707,7 +702,7 @@ pm_writebigshort(FILE * const ofP,
 
 
 int
-pm_readbiglong(FILE * const ifP, 
+pm_readbiglong(FILE * const ifP,
                long * const lP) {
 
     unsigned long l;
@@ -742,7 +737,7 @@ pm_readbiglong2(FILE *    const ifP,
 
 
 int
-pm_writebiglong(FILE * const ofP, 
+pm_writebiglong(FILE * const ofP,
                 long   const l) {
 
     putc((l >> 24) & 0xff, ofP);
@@ -756,7 +751,7 @@ pm_writebiglong(FILE * const ofP,
 
 
 int
-pm_readlittleshort(FILE *  const ifP, 
+pm_readlittleshort(FILE *  const ifP,
                    short * const sP) {
     unsigned short s;
 
@@ -771,7 +766,7 @@ pm_readlittleshort(FILE *  const ifP,
 
 
 int
-pm_writelittleshort(FILE * const ofP, 
+pm_writelittleshort(FILE * const ofP,
                     short  const s) {
 
     putc((s >> 0) & 0xff, ofP);
@@ -783,7 +778,7 @@ pm_writelittleshort(FILE * const ofP,
 
 
 int
-pm_readlittlelong(FILE * const ifP, 
+pm_readlittlelong(FILE * const ifP,
                   long * const lP) {
     unsigned long l;
 
@@ -817,7 +812,7 @@ pm_readlittlelong2(FILE *    const ifP,
 
 
 int
-pm_writelittlelong(FILE * const ofP, 
+pm_writelittlelong(FILE * const ofP,
                    long   const l) {
 
     putc((l >>  0) & 0xff, ofP);
@@ -830,17 +825,24 @@ pm_writelittlelong(FILE * const ofP,
 
 
 
-int 
+int
 pm_readmagicnumber(FILE * const ifP) {
 
     int ich1, ich2;
 
     ich1 = getc(ifP);
+
+    if (ich1 == EOF)
+        pm_error("Error reading first byte of what is expected to be "
+                 "a Netpbm magic number.  "
+                 "Most often, this means your input file is empty");
+
     ich2 = getc(ifP);
-    if (ich1 == EOF || ich2 == EOF)
-        pm_error( "Error reading magic number from Netpbm image stream.  "
-                  "Most often, this "
-                  "means your input file is empty." );
+
+    if (ich2 == EOF)
+        pm_error("Error reading second byte of what is expected to be "
+                 "a Netpbm magic number (the first byte was successfully "
+                 "read as 0x%02x)", ich1);
 
     return ich1 * 256 + ich2;
 }
@@ -860,7 +862,7 @@ pm_readmagicnumber(FILE * const ifP) {
                                   than this. */
 
 char *
-pm_read_unknown_size(FILE * const file, 
+pm_read_unknown_size(FILE * const file,
                      long * const nread) {
     long nalloc;
     char * buf;
@@ -868,9 +870,7 @@ pm_read_unknown_size(FILE * const file,
 
     *nread = 0;
     nalloc = PM_BUF_SIZE;
-    void *array;
-    mallocProduct(&array, nalloc , sizeof(char));
-    buf = (char *)array;
+    MALLOCARRAY(buf, nalloc);
 
     if (!buf)
         pm_error("Failed to allocate %lu bytes for read buffer",
@@ -886,11 +886,7 @@ pm_read_unknown_size(FILE * const file,
                 nalloc += PM_MAX_BUF_INC;
             else
                 nalloc += nalloc;
-	    array = buf;
-	    reallocProduct(&array, nalloc, sizeof(buf[0]));
-	    if (!array && buf)
-		    free(buf);
-	    buf = (char *)array;
+            REALLOCARRAY(buf, nalloc);
             if (!buf)
                 pm_error("Failed to allocate %lu bytes for read buffer",
                          (unsigned long) nalloc);
@@ -899,10 +895,90 @@ pm_read_unknown_size(FILE * const file,
         val = getc(file);
         if (val == EOF)
             eof = TRUE;
-        else 
+        else
             buf[(*nread)++] = val;
     }
     return buf;
+}
+
+
+
+void
+pm_getline(FILE *   const ifP,
+           char **  const bufferP,
+           size_t * const bufferSzP,
+           int *    const eofP,
+           size_t * const lineLenP) {
+/*----------------------------------------------------------------------------
+   This is like POSIX 'getline'.
+
+   But we don't include the newline in the returned line.
+-----------------------------------------------------------------------------*/
+    char * buffer;
+    size_t bufferSz;
+    bool gotLine;
+    bool eof;
+    size_t nReadSoFar;
+
+    buffer   = *bufferP;    /* initial value */
+    bufferSz = *bufferSzP;  /* initial value */
+
+    for (nReadSoFar = 0, gotLine = false, eof = false;
+         !gotLine && !eof; ) {
+
+        int rc;
+
+        rc = fgetc(ifP);
+
+        if (rc == EOF) {
+            if (ferror(ifP))
+                pm_error("Error reading input file.  fgets() failed with "
+                         "errno %d (%s)", errno, strerror(errno));
+
+            if (nReadSoFar == 0) {
+                /* Didn't get anything before EOF, so return EOF */
+                eof = true;
+            } else {
+                /* End of file ends the line */
+                gotLine = true;
+            }
+        } else {
+            char const c = (char)rc;
+
+            if (c == '\n') {
+                /* Newline ends the line, and is not part of it */
+                gotLine = true;
+            } else {
+                if (nReadSoFar + 2 > bufferSz) {
+                    /* + 2 = 1 for 'c', one for terminating NUL */
+                    bufferSz += 128;
+                    REALLOCARRAY(buffer, bufferSz);
+                    if (!buffer) {
+                        pm_error("Failed to allocate %lu bytes for buffer "
+                                 "to assemble a line of input",
+                                 (unsigned long) bufferSz);
+                    }
+                }
+                buffer[nReadSoFar++] = c;
+            }
+        }
+    }
+
+    if (gotLine) {
+        bufferSz = nReadSoFar + 1;
+        REALLOCARRAY(buffer, bufferSz);
+        if (!buffer) {
+            pm_error("Failed to allocate %lu bytes for buffer "
+                     "to assemble a line of input",
+                     (unsigned long) bufferSz);
+        }
+        buffer[nReadSoFar] = '\0';
+    }
+
+    *eofP      = eof;
+    *bufferP   = buffer;
+    *bufferSzP = bufferSz;
+    *lineLenP  = nReadSoFar;
 }
 
 
@@ -947,7 +1023,7 @@ pm_bs_long(long const l) {
 
 
 void
-pm_tell2(FILE *       const fileP, 
+pm_tell2(FILE *       const fileP,
          void *       const fileposP,
          unsigned int const fileposSize) {
 /*----------------------------------------------------------------------------
@@ -979,7 +1055,7 @@ pm_tell2(FILE *       const fileP,
         }
     } else
         pm_error("File position size passed to pm_tell() is invalid: %u.  "
-                 "Valid sizes are %u and %u", 
+                 "Valid sizes are %u and %u",
                  fileposSize, (unsigned int)sizeof(pm_filepos),
                  (unsigned int) sizeof(long));
 }
@@ -988,7 +1064,7 @@ pm_tell2(FILE *       const fileP,
 
 unsigned int
 pm_tell(FILE * const fileP) {
-    
+
     long filepos;
 
     pm_tell2(fileP, &filepos, sizeof(filepos));
@@ -999,14 +1075,14 @@ pm_tell(FILE * const fileP) {
 
 
 void
-pm_seek2(FILE *             const fileP, 
+pm_seek2(FILE *             const fileP,
          const pm_filepos * const fileposP,
          unsigned int       const fileposSize) {
 /*----------------------------------------------------------------------------
    Position file *fileP to position *fileposP.  Abort if error, including
    if *fileP isn't a seekable file.
 -----------------------------------------------------------------------------*/
-    if (fileposSize == sizeof(pm_filepos)) 
+    if (fileposSize == sizeof(pm_filepos))
         /* Note: FSEEKO() is either fseeko() or fseek(), depending on the
            capabilities of the underlying C library.  It is defined in
            pm_config.h.  fseeko(), in turn, may be either fseek() or
@@ -1018,7 +1094,7 @@ pm_seek2(FILE *             const fileP,
         fseek(fileP, fileposLong, SEEK_SET);
     } else
         pm_error("File position size passed to pm_seek() is invalid: %u.  "
-                 "Valid sizes are %u and %u", 
+                 "Valid sizes are %u and %u",
                  fileposSize, (unsigned int)sizeof(pm_filepos),
                  (unsigned int) sizeof(long));
 }
@@ -1045,7 +1121,7 @@ pm_nextimage(FILE * const file, int * const eofP) {
    Position the file 'file' to the next image in the stream, assuming it is
    now positioned just after the current image.  I.e. read off any white
    space at the end of the current image's raster.  Note that the raw formats
-   don't permit such white space, but this routine tolerates it anyway, 
+   don't permit such white space, but this routine tolerates it anyway,
    because the plain formats do permit white space after the raster.
 
    Iff there is no next image, return *eofP == TRUE.
@@ -1070,7 +1146,7 @@ pm_nextimage(FILE * const file, int * const eofP) {
         int c;
         c = getc(file);
         if (c == EOF) {
-            if (feof(file)) 
+            if (feof(file))
                 eof = TRUE;
             else
                 pm_error("File error on getc() to position to image");
@@ -1081,10 +1157,10 @@ pm_nextimage(FILE * const file, int * const eofP) {
                 nonWhitespaceFound = TRUE;
 
                 /* Have to put the non-whitespace character back in
-                   the stream -- it's part of the next image.  
+                   the stream -- it's part of the next image.
                 */
                 rc = ungetc(c, file);
-                if (rc == EOF) 
+                if (rc == EOF)
                     pm_error("File error doing ungetc() "
                              "to position to image.");
             }
@@ -1096,8 +1172,8 @@ pm_nextimage(FILE * const file, int * const eofP) {
 
 
 void
-pm_check(FILE *               const file, 
-         enum pm_check_type   const check_type, 
+pm_check(FILE *               const file,
+         enum pm_check_type   const check_type,
          pm_filepos           const need_raster_size,
          enum pm_check_code * const retval_p) {
 /*----------------------------------------------------------------------------
@@ -1115,9 +1191,9 @@ pm_check(FILE *               const file,
     curpos = FTELLO(file);
     if (curpos >= 0) {
         /* This type of file has a current position */
-            
+
         rc = fstat(fileno(file), &statbuf);
-        if (rc != 0) 
+        if (rc != 0)
             pm_error("fstat() failed to get size of file, though ftello() "
                      "successfully identified\n"
                      "the current position.  Errno=%s (%d)",
@@ -1127,12 +1203,12 @@ pm_check(FILE *               const file,
             if (retval_p) *retval_p = PM_CHECK_UNCHECKABLE;
         } else {
             pm_filepos const have_raster_size = statbuf.st_size - curpos;
-            
+
             if (have_raster_size < need_raster_size)
                 pm_error("File has invalid format.  The raster should "
                          "contain %u bytes, but\n"
                          "the file ends after only %u bytes.",
-                         (unsigned int) need_raster_size, 
+                         (unsigned int) need_raster_size,
                          (unsigned int) have_raster_size);
             else if (have_raster_size > need_raster_size) {
                 if (retval_p) *retval_p = PM_CHECK_TOO_LONG;

@@ -39,13 +39,6 @@ cmake_minimum_required(VERSION 3.18)
 # set CMake project name
 project(NETPBM)
 
-# install(CODE) uses generator expressions - requires 3.14 or newer.
-# We want it to be on, but until we can bump our minimum requirement
-# set it to OLD to make sure we don't break anything.
-if (POLICY CMP0087)
-  cmake_policy(SET CMP0087 OLD)
-endif (POLICY CMP0087)
-
 if (NOT BIN_DIR)
   set(BIN_DIR bin)
 endif (NOT BIN_DIR)
@@ -112,7 +105,9 @@ set(NETPBM_SRCS
   lib/libpbm1.c
   lib/libpbm2.c
   lib/libpbm3.c
-  lib/libpbmfont.c
+  lib/libpbmfont0.c
+  lib/libpbmfont1.c
+  lib/libpbmfont2.c
   lib/libpgm1.c
   lib/libpgm2.c
   lib/libpm.c
@@ -127,6 +122,9 @@ set(NETPBM_SRCS
   lib/libppmfloyd.c
   lib/libppmfuzzy.c
   lib/path.c
+  lib/pbmfontdata0.c
+  lib/pbmfontdata1.c
+  lib/pbmfontdata2.c
   lib/pmfileio.cxx
   lib/ppmdfont.c
   lib/standardppmdfont.c
