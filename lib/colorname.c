@@ -12,7 +12,9 @@
 ** implied warranty.
 */
 
-#define _BSD_SOURCE 1      /* Make sure strdup() is in string.h */
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE 1      /* Make sure strdup() is in string.h */
+#endif
 #define _XOPEN_SOURCE 500  /* Make sure strdup() is in string.h */
 
 #include "netpbm/pm_c_util.h"
@@ -29,12 +31,12 @@ static int lineNo;
 
 
 
-void 
-pm_canonstr(char * const arg) {
+void
+pm_canonstr(char * arg) {
 /*----------------------------------------------------------------------------
    Modify string 'arg' to canonical form: lower case, no white space.
 -----------------------------------------------------------------------------*/
-    const char * srcCursor;
+    char * srcCursor;
     char * dstCursor;
 
     for (srcCursor = arg, dstCursor = arg; *srcCursor; ++srcCursor) {
@@ -163,7 +165,7 @@ pm_parse_dictionary_name(char    const colorname[],
     pixval r,g,b;
 
     f = pm_openColornameFile(NULL, TRUE);  /* exits if error */
-    canoncolor = pm_strdup(colorname);
+    canoncolor = (char *)pm_strdup(colorname);
 
     if (!canoncolor)
         pm_error("Failed to allocate memory for %u-byte color name",

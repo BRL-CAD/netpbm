@@ -870,7 +870,9 @@ pm_read_unknown_size(FILE * const file,
 
     *nread = 0;
     nalloc = PM_BUF_SIZE;
-    MALLOCARRAY(buf, nalloc);
+    void *array;
+    mallocProduct(&array, nalloc, sizeof(buf[0]));
+    buf = (char *)array;
 
     if (!buf)
         pm_error("Failed to allocate %lu bytes for read buffer",
@@ -886,7 +888,11 @@ pm_read_unknown_size(FILE * const file,
                 nalloc += PM_MAX_BUF_INC;
             else
                 nalloc += nalloc;
-            REALLOCARRAY(buf, nalloc);
+	    void *array = buf;
+	    reallocProduct(&array, nalloc, sizeof(buf[0]));
+	    if (!array && buf)
+		    free(buf);
+	    buf = (char *)array;
             if (!buf)
                 pm_error("Failed to allocate %lu bytes for read buffer",
                          (unsigned long) nalloc);
@@ -952,7 +958,11 @@ pm_getline(FILE *   const ifP,
                 if (nReadSoFar + 2 > bufferSz) {
                     /* + 2 = 1 for 'c', one for terminating NUL */
                     bufferSz += 128;
-                    REALLOCARRAY(buffer, bufferSz);
+		    void *array = buffer;
+		    reallocProduct(&array, bufferSz, sizeof(buffer[0]));
+		    if (!array && buffer)
+			    free(buffer);
+		    buffer = (char *)array;
                     if (!buffer) {
                         pm_error("Failed to allocate %lu bytes for buffer "
                                  "to assemble a line of input",
@@ -966,7 +976,11 @@ pm_getline(FILE *   const ifP,
 
     if (gotLine) {
         bufferSz = nReadSoFar + 1;
-        REALLOCARRAY(buffer, bufferSz);
+	void *array = buffer;
+	reallocProduct(&array, bufferSz, sizeof(buffer[0]));
+	if (!array && buffer)
+		free(buffer);
+	buffer = (char *)array;
         if (!buffer) {
             pm_error("Failed to allocate %lu bytes for buffer "
                      "to assemble a line of input",

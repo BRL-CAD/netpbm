@@ -80,7 +80,7 @@ reallocProduct(void **      const blockP,
 #define MALLOCARRAY(arrayName, nElements) do { \
     void * array; \
     mallocProduct(&array, nElements, sizeof(arrayName[0])); \
-    arrayName = (char *)array; \
+    arrayName = array; \
 } while (0)
 
 #define REALLOCARRAY(arrayName, nElements) do { \
@@ -89,7 +89,7 @@ reallocProduct(void **      const blockP,
     reallocProduct(&array, nElements, sizeof(arrayName[0])); \
     if (!array && arrayName) \
         free(arrayName); \
-    arrayName = (char *)array; \
+    arrayName = array; \
 } while (0)
 
 

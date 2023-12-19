@@ -29,7 +29,7 @@ struct colorfile_entry {
 
 
 void
-pm_canonstr(char * const str);
+pm_canonstr(char * str);
 
 NETPBM_EXPORT FILE *
 pm_openColornameFile(const char * const fileName, const int must_open);
