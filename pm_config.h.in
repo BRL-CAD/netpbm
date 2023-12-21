@@ -314,7 +314,9 @@
 # endif
 #endif
 
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>  /* Get _LFS_LARGEFILE defined */
+#endif
 #include <sys/types.h>
 /* In GNU, _LFS_LARGEFILE means the "off_t" functions (ftello, etc.) are
    available.  In AIX, _AIXVERSION_430 means it's AIX Version 4.3.0 or
