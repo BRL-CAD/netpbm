@@ -110,9 +110,11 @@ extern "C" {
 #if MSVCRT
   #define PM_S_IWUSR _S_IWRITE
   #define PM_S_IRUSR _S_IREAD
+  #define PM_S_ISREG(x) ((x) & S_IFREG)
 #else
   #define PM_S_IWUSR S_IWUSR
   #define PM_S_IRUSR S_IRUSR
+  #define PM_S_ISREG S_ISREG
 #endif
 
 

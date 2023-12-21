@@ -45,6 +45,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <string.h>
+#include <time.h>
 #include <errno.h>
 #if HAVE_IO_H
   #include <io.h>  /* For mktemp */
@@ -183,9 +184,9 @@ mkstemp(char *file_template)
     		file_template[i] = replace[(int)(replacelen * ((double)rand() / (double)RAND_MAX))];
     	}
 #ifdef WIN32
-    	fd = _open(file_template, O_CREAT | O_EXCL | O_TRUNC | O_RDWR | O_TEMPORARY, S_IRUSR | S_IWUSR);
+	fd = _open(file_template, O_CREAT | O_EXCL | O_TRUNC | O_RDWR | O_TEMPORARY, PM_S_IRUSR | PM_S_IWUSR);
 #else
-    	fd = open(file_template, O_CREAT | O_EXCL | O_TRUNC | O_RDWR | O_TEMPORARY, S_IRUSR | S_IWUSR);
+	fd = open(file_template, O_CREAT | O_EXCL | O_TRUNC | O_RDWR | O_TEMPORARY, PM_S_IRUSR | PM_S_IWUSR);
 #endif
     } while ((fd == -1) && (counter++ < 1000));
 
@@ -543,7 +544,7 @@ pm_openr_seekable(const char name[]) {
     */
 
     stat_rc = fstat(fileno(original_file), &statbuf);
-    if (stat_rc == 0 && S_ISREG(statbuf.st_mode))
+    if (stat_rc == 0 && PM_S_ISREG(statbuf.st_mode))
         seekable = TRUE;
     else
         seekable = FALSE;
@@ -1212,7 +1213,7 @@ pm_check(FILE *               const file,
                      "successfully identified\n"
                      "the current position.  Errno=%s (%d)",
                      strerror(errno), errno);
-        else if (!S_ISREG(statbuf.st_mode)) {
+        else if (!PM_S_ISREG(statbuf.st_mode)) {
             /* Not a regular file; we can't know its size */
             if (retval_p) *retval_p = PM_CHECK_UNCHECKABLE;
         } else {
