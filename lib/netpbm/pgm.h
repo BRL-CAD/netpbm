@@ -14,6 +14,32 @@ extern "C" {
 } /* to fake out automatic code indenters */
 #endif
 
+/* Make sure we have ssize_t */
+#if defined(_MSC_VER) && !defined(HAVE_SSIZE_T)
+#  ifdef HAVE_SYS_TYPES_H
+#    include <sys/types.h>
+#  endif
+#  include <limits.h>
+#  include <stddef.h>
+typedef ptrdiff_t ssize_t;
+#  define HAVE_SSIZE_T 1
+#  ifndef SSIZE_MAX
+#    if defined(LONG_MAX)
+#      define SSIZE_MAX LONG_MAX
+#    elif defined(INT_MAX)
+#      define SSIZE_MAX INT_MAX
+#    elif defined(_POSIX_SSIZE_MAX)
+#      define SSIZE_MAX _POSIX_SSIZE_MAX
+#    else
+       /* Go with POSIX minimum acceptable value. This is smaller than
+        * we would like, but is a safe default value.
+        */
+#      define SSIZE_MAX 32767
+#    endif
+#  endif
+#endif
+
+
 /* The following definition has nothing to do with the format of a PGM file */
 typedef unsigned int gray;
 
