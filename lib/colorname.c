@@ -16,6 +16,7 @@
 #define _DEFAULT_SOURCE 1      /* Make sure strdup() is in string.h */
 #endif
 #define _XOPEN_SOURCE 500  /* Make sure strdup() is in string.h */
+#define _DARWIN_C_SOURCE   /* Make sure strdup() is in string.h */
 
 #include "netpbm/pm_c_util.h"
 #include <ctype.h>
