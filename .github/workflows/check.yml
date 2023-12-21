@@ -1,0 +1,273 @@
+# This file defines Continuous Integration (CI) tests for bext using the
+# Github Actions framework.  Currently it defines configurations for Windows,
+# Linux and OSX.
+#
+# For more information about available platforms for testing, see:
+#
+# https://docs.github.com/en/free-pro-team@latest/actions/reference/specifications-for-github-hosted-runners
+#
+# The general rule when building in CI is to go more verbose in output settings
+# rather than less, since iterative debugging isn't practical.
+#
+# We generally want to avoid parallel building - while that will sometimes
+# catch dependency issues, it also makes the outputs far harder to interpret
+# when there is a problem.  However, the full BRL-CAD dependency stack is quite
+# a long build, so in this case we are experimenting with it to see if it can
+# help our build times on the runners.
+
+name: BRL-CAD
+
+on: [push]
+
+jobs:
+  windows_ninja_release:
+    name: MSVC - Ninja Release build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add github workspace to path
+        # https://github.community/t/deprecated-add-path/136621
+        run: echo "$ENV{GITHUB_WORKSPACE}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1.3
+
+      - name: Add cl.exe to PATH
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" -DCMAKE_BUILD_TYPE=Release -DENABLE_ALL=ON
+          # We do the following in order to help ensure files are "flushed"
+          # to disk before compilation is attempted
+          # https://superuser.com/a/1553374/1286142
+          powershell Write-VolumeCache C
+          powershell Write-VolumeCache D
+
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cd build && ninja -j2 -v
+
+        # TODO - if the loading isn't too extreme, it would be good to do a BRL-CAD
+        # build against the output of this...
+#     - name: Build - BRL-CAD
+#       run: |
+#         # TODO - figure out how to do this...
+
+  windows_ninja_debug:
+    name: MSVC - Ninja Debug build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add github workspace to path
+        # https://github.community/t/deprecated-add-path/136621
+        run: echo "$ENV{GITHUB_WORKSPACE}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1.3
+
+      - name: Add cl.exe to PATH
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER="cl.exe" -DCMAKE_CXX_COMPILER="cl.exe" -DCMAKE_BUILD_TYPE=Debug -DENABLE_ALL=ON
+          # We do the following in order to help ensure files are "flushed"
+          # to disk before compilation is attempted
+          # https://superuser.com/a/1553374/1286142
+          powershell Write-VolumeCache C
+          powershell Write-VolumeCache D
+
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cd build && ninja -j2 -v
+
+        # TODO - if the loading isn't too extreme, it would be good to do a BRL-CAD
+        # build against the output of this...
+#     - name: Build - BRL-CAD
+#       run: |
+#         # TODO - figure out how to do this...
+
+
+  windows_std_tools_release:
+    name: MSVC - Standard Tools Release Build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add github workspace to path
+        # https://github.community/t/deprecated-add-path/136621
+        run: echo "$ENV{GITHUB_WORKSPACE}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Configure
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake -S . -B build -DENABLE_ALL=ON
+          # We do the following in order to help ensure files are "flushed"
+          # to disk before compilation is attempted
+          # https://superuser.com/a/1553374/1286142
+          powershell Write-VolumeCache C
+          powershell Write-VolumeCache D
+
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake --build build --config Release -j2
+
+  windows_std_tools_debug:
+    name: MSVC - Standard Tools Debug Build
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add github workspace to path
+        # https://github.community/t/deprecated-add-path/136621
+        run: echo "$ENV{GITHUB_WORKSPACE}" | Out-File -Append -FilePath $env:GITHUB_PATH -Encoding utf8
+
+      - name: Configure
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake -S . -B build -DENABLE_ALL=ON
+          # We do the following in order to help ensure files are "flushed"
+          # to disk before compilation is attempted
+          # https://superuser.com/a/1553374/1286142
+          powershell Write-VolumeCache C
+          powershell Write-VolumeCache D
+
+      - name: Build
+        shell: cmd
+        run: |
+          call "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
+          cmake --build build --config Debug -j2
+
+
+  linux_release:
+    name: Ubuntu GCC Release Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cmake -S . -G Ninja -B build -DENABLE_ALL=ON -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cd build && ninja -j2 -v
+
+  linux_debug:
+    name: Ubuntu GCC Debug Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cmake -S . -G Ninja -B build -DENABLE_ALL=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cd build && ninja -j2 -v
+
+
+  osx_release:
+    name: macOS Clang Release Build
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          export CC=clang
+          export CXX=clang++
+          cmake -S . -G Ninja -B build -DENABLE_ALL=ON -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cd build && ninja -j2 -v
+
+  osx_debug:
+    name: macOS Clang Debug Build
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+    steps:
+      - name: Setup - CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          export CC=clang
+          export CXX=clang++
+          cmake -S . -G Ninja -B build -DENABLE_ALL=ON -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: |
+          export PATH=$ENV{GITHUB_WORKSPACE}:$PATH
+          cd build && ninja -j2 -v
+
