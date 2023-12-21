@@ -314,6 +314,7 @@
 # endif
 #endif
 
+#cmakedefine HAVE_UNISTD_H 1
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>  /* Get _LFS_LARGEFILE defined */
 #endif
