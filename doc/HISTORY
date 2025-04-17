@@ -4,6 +4,46 @@ Netpbm.
 CHANGE HISTORY 
 --------------
 
+25.04.07 BJH  Release 10.86.46
+
+              pnmquantall: fix arbitrary shell command execution with input
+              file names or color count that contain shell metacharacters.
+              Always present ('pnmquantall' has existed, aka 'ppmquantall',
+              since primordial Netpbm).
+
+              ppmtogif: fix arbitrary shell commands when arguments contain
+              shell metacharacters.  Broken in Netpbm 10.37 (June 2006).
+
+              pnmtofiasco: fix crash when image is really small.  Always
+              broken (programs were new in Netpbm 9.6, July 2000).
+              
+              pnmtofiasco: fix bug: uses one tile regardless of
+              --tiling-exponent.  Always broken (programs were new in Netpbm
+              9.6, July 2000).
+
+25.03.28 BJH  Release 10.86.45
+
+              giftopnm: Fix wild pointer reference with -verbose and
+              invalid extension type.  Broken in Netpbm 10.59 (December 2012).
+
+              pdbimgtopam, pamtopdbimg: Fix crash when out of memory.  Always
+              broken (programs were new in Netpbm 10.52 (September 2010)).
+
+24.12.25 BJH  Release 10.86.44
+
+              pbmtoascii: fix bug: allows both -1x2 and -2x4.  Always present
+              (pbmtoascii existed in primordial Netpbm).
+
+24.09.29 BJH  Release 10.86.43
+
+              libnetpbm color name parsing: Fix handling of rgb: color names
+              with more than 4 hex digits per plane, so it throws an error
+              instead of generating an invalid or wrong color.  Broken in
+              primordial Netpbm.
+
+              libnetpbm color name parsing: Fix error message for invalid
+              rgb-<MAXVAL> color name.
+
 24.06.28 BJH  Release 10.86.42
 
               libnetpbm: Fix double free crash when memory allocation via
